@@ -89,7 +89,7 @@ class InputSanitizer::Sanitizer
     raise "You did not define a sanitizer for nested value" if nested_sanitizer == nil
 
     converter = lambda { |value, sanitizer|
-      s = nested_sanitizer.new(value, options[:options] || {})
+      s = nested_sanitizer.new(value, options[:sanitizer_options] || {})
       data = s.cleaned
       sanitizer.send(:concat_errors!, s.errors) if options[:include_errors]
       data
