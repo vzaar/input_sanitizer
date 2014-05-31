@@ -62,6 +62,24 @@ describe InputSanitizer::Sanitizer do
     let(:cleaned) { sanitizer.cleaned }
     let(:required) { RequiredParameters.new(@params) }
 
+    context "freezing the hash" do
+      it "freezes cleaned hash" do
+        @params = {}
+        cleaned.should be_frozen
+      end
+
+      context "when freezing is disabled" do
+        let(:sanitizer) do
+          BasicSanitizer.new(@params, :freeze_output => false)
+        end
+
+        specify do
+          @params = {}
+          cleaned.should_not be_frozen
+        end
+      end
+    end
+
     it "includes specified params" do
       @params = {"x" => 3, "y" => "tom", "z" => "mike"}
 
@@ -74,12 +92,6 @@ describe InputSanitizer::Sanitizer do
       @params = {"d" => 3}
 
       cleaned.should_not have_key(:d)
-    end
-
-    it "freezes cleaned hash" do
-      @params = {}
-
-      cleaned.should be_frozen
     end
 
     it "uses RestrictedHash" do

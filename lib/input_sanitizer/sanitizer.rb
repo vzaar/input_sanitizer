@@ -2,11 +2,12 @@ require 'input_sanitizer/restricted_hash'
 require 'input_sanitizer/default_converters'
 
 class InputSanitizer::Sanitizer
-  def initialize(data)
+  def initialize(data, opts={})
     @data = symbolize_keys(data)
     @performed = false
     @errors = []
     @cleaned = InputSanitizer::RestrictedHash.new(self.class.fields.keys)
+    @opts = opts
   end
 
   def self.clean(data)
@@ -28,7 +29,12 @@ class InputSanitizer::Sanitizer
       clean_field(field, type, required, collection, namespace, default)
     end
     @performed = true
-    @cleaned.freeze
+
+    if @opts[:freeze_output].nil? || @opts[:freeze_output] == true
+      @cleaned.freeze
+    end
+
+    @cleaned
   end
 
   def valid?
