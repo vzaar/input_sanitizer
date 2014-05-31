@@ -1,5 +1,6 @@
 require 'time'
 require 'date'
+require 'stringio'
 
 module InputSanitizer
   class ConversionError < Exception
@@ -18,6 +19,22 @@ module InputSanitizer
   class StringConverter
     def call(value)
       value.to_s
+    end
+  end
+
+  class StringIOConverter
+    def call(value)
+      StringIO.new(value.to_s)
+    end
+  end
+
+  class NotBlankStringConverter < InputSanitizer::StringConverter
+    def call(value)
+      if value.nil? || value == ""
+        raise ConversionError.new("empty string")
+      else
+        super(value)
+      end
     end
   end
 
