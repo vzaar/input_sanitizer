@@ -80,6 +80,8 @@ module InputSanitizer
       false => false,
       'true' => true,
       'false' => false,
+      'True' => true,
+      'False' => false,
       '1' => true,
       '0' => false,
       'yes' => true,

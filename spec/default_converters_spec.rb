@@ -35,6 +35,10 @@ describe InputSanitizer::BooleanConverter do
     converter.call('true').should be_true
   end
 
+  it "casts 'True' to true" do
+    converter.call('True').should be_true
+  end
+
   it "casts true to true" do
     converter.call(true).should be_true
   end
@@ -49,6 +53,10 @@ describe InputSanitizer::BooleanConverter do
 
   it "casts 'false' to false" do
     converter.call('false').should be_false
+  end
+
+  it "casts 'False' to false" do
+    converter.call('False').should be_false
   end
 
   it "casts false to false" do
