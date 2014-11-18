@@ -26,7 +26,8 @@ class InputSanitizer::Sanitizer
       collection = hash[:options][:collection]
       namespace = hash[:options][:namespace]
       default = hash[:options][:default]
-      clean_field(field, type, required, collection, namespace, default)
+      as = hash[:options][:as]
+      clean_field(field, type, required, collection, namespace, default, as)
     end
     @performed = true
 
@@ -117,16 +118,17 @@ class InputSanitizer::Sanitizer
     array.last.is_a?(Hash) ? array.last : {}
   end
 
-  def clean_field(field, type, required, collection, namespace, default)
+  def clean_field(field, type, required, collection, namespace, default, as=nil)
+    field_name = as || field
     if @data.has_key?(field)
       begin
-        @cleaned[field] = convert(field, type, collection, namespace)
+        @cleaned[field_name] = convert(field, type, collection, namespace)
       rescue InputSanitizer::ConversionError => ex
         add_error(field, :invalid_value, @data[field], ex.message)
       end
     elsif default
       args = build_converter_args(type, default)
-      @cleaned[field] = converter(type).call(*args)
+      @cleaned[field_name] = converter(type).call(*args)
     elsif required
       add_missing(field)
     end
