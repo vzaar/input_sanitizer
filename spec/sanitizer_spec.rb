@@ -15,9 +15,11 @@ class BasicSanitizer < InputSanitizer::Sanitizer
   integer :array, :collection => true
   integer :namespaced_array, :collection => true, :namespace => :value
   integer :num
+  integer :profile, :as => :size_id
   date :birthday
   time :updated_at
   custom :cust1, :cust2, :converter => lambda { |v, s| v.reverse }
+  custom :my_field, :converter => lambda { |v, s| v }, :as => :myfield
   nested :stuff, :sanitizer => NestedSanitizer, :collection => true, :namespace => :nested
   nested :stuff2, :sanitizer => NestedSanitizer2, :include_errors => true
 end
@@ -160,6 +162,14 @@ describe InputSanitizer::Sanitizer do
       cleaned.should have_key(:is_nice)
       cleaned[:is_nice].should == 42
     end
+
+
+    describe "aliases" do
+      before { @params = { :profile => 10, :my_field => 1 } }
+      specify { cleaned.should have_key(:size_id) }
+      specify { cleaned.should have_key(:myfield) }
+    end
+
 
     context "when sanitizer is initialized with default values" do
       context "when paremeters are not overwriten" do
