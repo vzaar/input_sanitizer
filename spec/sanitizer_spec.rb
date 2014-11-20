@@ -165,9 +165,20 @@ describe InputSanitizer::Sanitizer do
 
 
     describe "aliases" do
-      before { @params = { :profile => 10, :my_field => 1 } }
-      specify { cleaned.should have_key(:size_id) }
-      specify { cleaned.should have_key(:myfield) }
+      context "when value exists" do
+        before { @params = { :profile => 10, :my_field => 1 } }
+        specify { cleaned.should have_key(:size_id) }
+        specify { cleaned.should have_key(:myfield) }
+      end
+
+      context "when key doesn't exist" do
+        before { @params = {} }
+        specify do
+          lambda do
+            cleaned[:size_id]
+          end.should_not raise_error(InputSanitizer::KeyNotAllowedError)
+        end
+      end
     end
 
 

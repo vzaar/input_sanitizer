@@ -6,7 +6,9 @@ class InputSanitizer::Sanitizer
     @data = symbolize_keys(data)
     @performed = false
     @errors = []
-    @cleaned = InputSanitizer::RestrictedHash.new(self.class.fields.keys)
+
+    fields = self.class.fields
+    @cleaned = InputSanitizer::RestrictedHash.new(fields.keys + find_aliases(fields))
     @opts = opts
   end
 
@@ -110,6 +112,13 @@ class InputSanitizer::Sanitizer
   end
 
   private
+
+  def find_aliases(fields)
+    fields.map do |field|
+      field[1][:options][:as]
+    end.compact
+  end
+
   def self.extract_options!(array)
     array.last.is_a?(Hash) ? array.pop : {}
   end
