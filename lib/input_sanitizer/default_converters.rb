@@ -16,6 +16,14 @@ module InputSanitizer
     end
   end
 
+  class FloatConverter
+    def call(value)
+      Float(value)
+    rescue ArgumentError
+      raise ConversionError.new("invalid decimal")
+    end
+  end
+
   class StringConverter
     def call(value)
       value.to_s
