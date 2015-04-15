@@ -20,11 +20,11 @@ describe InputSanitizer::FloatConverter do
   let(:converter) { InputSanitizer::FloatConverter.new }
 
   it "casts string to float" do
-    expect(converter.call("42")).to eq(42)
+    expect(converter.call("42")).to eq(42.0)
   end
 
   it "casts integer to float" do
-    expect(converter.call(42)).to eq(42)
+    expect(converter.call(42)).to eq(42.0)
   end
 
   it "casts float to float" do
