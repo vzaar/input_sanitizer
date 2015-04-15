@@ -55,8 +55,8 @@ describe InputSanitizer::Sanitizer do
   describe ".clean" do
     it "returns cleaned data" do
       clean_data = double
-      BasicSanitizer.any_instance.should_receive(:cleaned).and_return(clean_data)
-      BasicSanitizer.clean({}).should be(clean_data)
+      expect_any_instance_of(BasicSanitizer).to receive(:cleaned).and_return(clean_data)
+      expect(BasicSanitizer.clean({})).to be(clean_data)
     end
   end
 
@@ -67,7 +67,7 @@ describe InputSanitizer::Sanitizer do
     context "freezing the hash" do
       it "freezes cleaned hash" do
         @params = {}
-        cleaned.should be_frozen
+        expect(cleaned).to be_frozen
       end
 
       context "when freezing is disabled" do
@@ -77,7 +77,7 @@ describe InputSanitizer::Sanitizer do
 
         specify do
           @params = {}
-          cleaned.should_not be_frozen
+          expect(cleaned).not_to be_frozen
         end
       end
     end
@@ -85,49 +85,49 @@ describe InputSanitizer::Sanitizer do
     it "includes specified params" do
       @params = {"x" => 3, "y" => "tom", "z" => "mike"}
 
-      cleaned.should have_key(:x)
-      cleaned.should have_key(:y)
-      cleaned.should have_key(:z)
+      expect(cleaned).to have_key(:x)
+      expect(cleaned).to have_key(:y)
+      expect(cleaned).to have_key(:z)
     end
 
     it "strips not specified params" do
       @params = {"d" => 3}
 
-      cleaned.should_not have_key(:d)
+      expect(cleaned).not_to have_key(:d)
     end
 
     it "uses RestrictedHash" do
       @params = {}
 
-      lambda{cleaned[:does_not_exist]}.should raise_error(InputSanitizer::KeyNotAllowedError)
+      expect{cleaned[:does_not_exist]}.to raise_error(InputSanitizer::KeyNotAllowedError)
     end
 
     it "includes specified keys and strips rest" do
       @params = {"d" => 3, "x" => "ddd"}
 
-      cleaned.should have_key(:x)
-      cleaned.should_not have_key(:d)
+      expect(cleaned).to have_key(:x)
+      expect(cleaned).not_to have_key(:d)
     end
 
     it "works with symbols as input keys" do
       @params = {:d => 3, :x => "ddd"}
 
-      cleaned.should have_key(:x)
-      cleaned.should_not have_key(:d)
+      expect(cleaned).to have_key(:x)
+      expect(cleaned).not_to have_key(:d)
     end
 
     it "preserves namespace" do
       value = { :value => 5 }
       @params = { :namespaced => value }
 
-      cleaned[:namespaced].should eq(value)
+      expect(cleaned[:namespaced]).to eq(value)
     end
 
     it "maps values for collection fields" do
       numbers = [3, 5, 6]
       @params = { :array => numbers }
 
-      cleaned[:array].should eq(numbers)
+      expect(cleaned[:array]).to eq(numbers)
     end
 
     it "maps values for collection fields with namespace" do
@@ -137,46 +137,46 @@ describe InputSanitizer::Sanitizer do
       ]
       @params = { :namespaced_array => numbers }
 
-      cleaned[:namespaced_array].should eq(numbers)
+      expect(cleaned[:namespaced_array]).to eq(numbers)
     end
 
     it "silently discards cast errors" do
       @params = {:num => "f"}
 
-      cleaned.should_not have_key(:num)
+      expect(cleaned).not_to have_key(:num)
     end
 
     it "inherits converters from superclass" do
       sanitizer = ExtendedSanitizer.new({:num => "23", :is_nice => 'false'})
       cleaned = sanitizer.cleaned
 
-      cleaned.should have_key(:num)
-      cleaned[:num].should == 23
-      cleaned[:is_nice].should be_false
+      expect(cleaned).to have_key(:num)
+      expect(cleaned[:num]).to eq(23)
+      expect(cleaned[:is_nice]).to be_falsey
     end
 
     it "overrides inherited fields" do
       sanitizer = OverridingSanitizer.new({:is_nice => "42"})
       cleaned = sanitizer.cleaned
 
-      cleaned.should have_key(:is_nice)
-      cleaned[:is_nice].should == 42
+      expect(cleaned).to have_key(:is_nice)
+      expect(cleaned[:is_nice]).to eq(42)
     end
 
 
     describe "aliases" do
       context "when value exists" do
         before { @params = { :profile => 10, :my_field => 1 } }
-        specify { cleaned.should have_key(:size_id) }
-        specify { cleaned.should have_key(:myfield) }
+        specify { expect(cleaned).to have_key(:size_id) }
+        specify { expect(cleaned).to have_key(:myfield) }
       end
 
       context "when key doesn't exist" do
         before { @params = {} }
         specify do
-          lambda do
+          expect do
             cleaned[:size_id]
-          end.should_not raise_error(InputSanitizer::KeyNotAllowedError)
+          end.not_to raise_error
         end
       end
     end
@@ -187,11 +187,11 @@ describe InputSanitizer::Sanitizer do
         let(:sanitizer) { DefaultParameters.new({}) }
 
         it "returns default value for non custom key" do
-          sanitizer.cleaned[:funky_number].should == 5
+          expect(sanitizer.cleaned[:funky_number]).to eq(5)
         end
 
         it "returns default value for custom key" do
-          sanitizer.cleaned[:fixed_stuff].should == "default string"
+          expect(sanitizer.cleaned[:fixed_stuff]).to eq("default string")
         end
       end
 
@@ -199,11 +199,11 @@ describe InputSanitizer::Sanitizer do
         let(:sanitizer) { DefaultParameters.new({ :funky_number => 2, :fixed_stuff => "fixed" }) }
 
         it "returns default value for non custom key" do
-          sanitizer.cleaned[:funky_number].should == 2
+          expect(sanitizer.cleaned[:funky_number]).to eq(2)
         end
 
         it "returns default value for custom key" do
-          sanitizer.cleaned[:fixed_stuff].should == "fixed"
+          expect(sanitizer.cleaned[:fixed_stuff]).to eq("fixed")
         end
       end
     end
@@ -217,8 +217,8 @@ describe InputSanitizer::Sanitizer do
     it "converts using custom converter" do
       @params = {:cust1 => "cigam"}
 
-      cleaned.should have_key(:cust1)
-      cleaned[:cust1].should == "magic"
+      expect(cleaned).to have_key(:cust1)
+      expect(cleaned[:cust1]).to eq("magic")
     end
 
     it "raises an error when converter is not defined" do
@@ -243,7 +243,7 @@ describe InputSanitizer::Sanitizer do
         { :nested => { :foo => 5 } },
         { :nested => { :foo => 8 } },
       ]
-      cleaned[:stuff].should eq(expected)
+      expect(cleaned[:stuff]).to eq(expected)
     end
 
     context "with errors enabled" do
@@ -255,8 +255,8 @@ describe InputSanitizer::Sanitizer do
       it "adds errors from nested sanitizer to parent" do
         err = sanitizer.errors.first
 
-        err[:field].should eq(:bar)
-        err[:type].should eq(:missing)
+        expect(err[:field]).to eq(:bar)
+        expect(err[:type]).to eq(:missing)
       end
     end
   end
@@ -265,23 +265,23 @@ describe InputSanitizer::Sanitizer do
     let(:sanitizer) { InputSanitizer::Sanitizer }
 
     it "includes :integer type" do
-      sanitizer.converters.should have_key(:integer)
-      sanitizer.converters[:integer].should be_a(InputSanitizer::IntegerConverter)
+      expect(sanitizer.converters).to have_key(:integer)
+      expect(sanitizer.converters[:integer]).to be_a(InputSanitizer::IntegerConverter)
     end
 
     it "includes :string type" do
-      sanitizer.converters.should have_key(:string)
-      sanitizer.converters[:string].should be_a(InputSanitizer::StringConverter)
+      expect(sanitizer.converters).to have_key(:string)
+      expect(sanitizer.converters[:string]).to be_a(InputSanitizer::StringConverter)
     end
 
     it "includes :date type" do
-      sanitizer.converters.should have_key(:date)
-      sanitizer.converters[:date].should be_a(InputSanitizer::DateConverter)
+      expect(sanitizer.converters).to have_key(:date)
+      expect(sanitizer.converters[:date]).to be_a(InputSanitizer::DateConverter)
     end
 
     it "includes :boolean type" do
-      sanitizer.converters.should have_key(:boolean)
-      sanitizer.converters[:boolean].should be_a(InputSanitizer::BooleanConverter)
+      expect(sanitizer.converters).to have_key(:boolean)
+      expect(sanitizer.converters[:boolean]).to be_a(InputSanitizer::BooleanConverter)
     end
   end
 
@@ -290,15 +290,15 @@ describe InputSanitizer::Sanitizer do
     it "extracts hash from array if is last" do
       options = { :a => 1}
       array = [1,2, options]
-      BasicSanitizer.extract_options(array).should == options
-      array.should == [1,2, options]
+      expect(BasicSanitizer.extract_options(array)).to eq(options)
+      expect(array).to eq([1,2, options])
     end
 
     it "does not extract the last element if not a hash and returns default empty hash" do
       array = [1,2]
-      BasicSanitizer.extract_options(array).should_not == 2
-      BasicSanitizer.extract_options(array).should == {}
-      array.should == [1,2]
+      expect(BasicSanitizer.extract_options(array)).not_to eq(2)
+      expect(BasicSanitizer.extract_options(array)).to eq({})
+      expect(array).to eq([1,2])
     end
 
   end
@@ -308,14 +308,14 @@ describe InputSanitizer::Sanitizer do
     it "extracts hash from array if is last" do
       options = { :a => 1}
       array = [1,2, options]
-      BasicSanitizer.extract_options!(array).should == options
-      array.should == [1,2]
+      expect(BasicSanitizer.extract_options!(array)).to eq(options)
+      expect(array).to eq([1,2])
     end
 
     it "leaves other arrays alone" do
       array = [1,2]
-      BasicSanitizer.extract_options!(array).should == {}
-      array.should == [1,2]
+      expect(BasicSanitizer.extract_options!(array)).to eq({})
+      expect(array).to eq([1,2])
     end
 
   end
@@ -324,13 +324,13 @@ describe InputSanitizer::Sanitizer do
     it "is valid when params are ok" do
       @params = {:num => "3"}
 
-      sanitizer.should be_valid
+      expect(sanitizer).to be_valid
     end
 
     it "is not valid when missing params" do
       @params = {:num => "mike"}
 
-      sanitizer.should_not be_valid
+      expect(sanitizer).not_to be_valid
     end
   end
 
@@ -338,7 +338,7 @@ describe InputSanitizer::Sanitizer do
     it "accesses cleaned data" do
       @params = {:num => "3"}
 
-      sanitizer[:num].should == 3
+      expect(sanitizer[:num]).to eq(3)
     end
   end
 
@@ -347,26 +347,26 @@ describe InputSanitizer::Sanitizer do
       @params = {:num => "mike"}
 
       errors = sanitizer.errors
-      errors.size.should == 1
-      errors[0][:field].should == :num
-      errors[0][:type].should == :invalid_value
-      errors[0][:description].should == "invalid integer"
-      errors[0][:value].should == "mike"
+      expect(errors.size).to eq(1)
+      expect(errors[0][:field]).to eq(:num)
+      expect(errors[0][:type]).to eq(:invalid_value)
+      expect(errors[0][:description]).to eq("invalid integer")
+      expect(errors[0][:value]).to eq("mike")
     end
 
     it "returns error type missing if value is missing" do
       sanitizer = RequiredParameters.new({})
       error = sanitizer.errors[0]
-      error[:type].should == :missing
+      expect(error[:type]).to eq(:missing)
     end
 
     it "handles required custom params" do
       sanitizer = RequiredCustom.new({})
 
-      sanitizer.should_not be_valid
+      expect(sanitizer).not_to be_valid
       error = sanitizer.errors[0]
-      error[:type].should == :missing
-      error[:field].should == :c1
+      expect(error[:type]).to eq(:missing)
+      expect(error[:field]).to eq(:c1)
     end
   end
 end
