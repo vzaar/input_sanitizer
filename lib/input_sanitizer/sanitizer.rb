@@ -53,6 +53,7 @@ class InputSanitizer::Sanitizer
   def self.converters
     {
       :integer => InputSanitizer::IntegerConverter.new,
+      :float => InputSanitizer::FloatConverter.new,
       :string => InputSanitizer::StringConverter.new,
       :date => InputSanitizer::DateConverter.new,
       :time => InputSanitizer::TimeConverter.new,

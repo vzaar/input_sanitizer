@@ -16,6 +16,26 @@ describe InputSanitizer::IntegerConverter do
   end
 end
 
+describe InputSanitizer::FloatConverter do
+  let(:converter) { InputSanitizer::FloatConverter.new }
+
+  it "casts string to float" do
+    expect(converter.call("42")).to eq(42)
+  end
+
+  it "casts integer to float" do
+    expect(converter.call(42)).to eq(42)
+  end
+
+  it "casts float to float" do
+    expect(converter.call(42.12)).to eq(42.12)
+  end
+
+  it "raises error if cannot cast" do
+    expect { converter.call("f") }.to raise_error(InputSanitizer::ConversionError)
+  end
+end
+
 describe InputSanitizer::DateConverter do
   let(:converter) { InputSanitizer::DateConverter.new }
 
